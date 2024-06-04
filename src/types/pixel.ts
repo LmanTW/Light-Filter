@@ -1,0 +1,4 @@
+// Pixel
+export default interface {
+  
+} 
