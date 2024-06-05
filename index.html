@@ -14,18 +14,17 @@
       --backgroundColor: #DFE3E1;
       --textColor: #101311;
 
-      --primaryColor: #0BD611;
-      --highlightColor: #B40BE6;
       --mainColor: #f2f4f3;
+      --highlightColor: #B40BE6;
 
       --red: #F30E0E;
       --yellow: #ECF20F;
-      --green: #0FF21C;
-      --gray: #687870
+      --green: #0FF21C
     }
 
     * {
       font-family: Arial, sans-serif;
+      transition: background-color 1s, color 1s
     }
 
     ::-webkit-scrollbar {
@@ -52,7 +51,7 @@
 
     .button {
       text-decoration: underline;
-      transition: transform 0.5s cubic-bezier(0, 0.55, 0.45, 1);
+      transition: color 1s, transform 0.5s cubic-bezier(0, 0.55, 0.45, 1);
       cursor: pointer
     }
 
@@ -65,7 +64,7 @@
     }
 
     .highlightText {
-      background: linear-gradient(45deg, #B40BE6, #D90BE6);
+      background: linear-gradient(45deg, var(--highlightColor1), var(--highlightColor2));
 
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent

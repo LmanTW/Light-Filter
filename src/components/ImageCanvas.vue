@@ -1,10 +1,10 @@
 <style scoped>
   .uploadArea {
     opacity: 0.5;
-    transition: transform 0.5s, opacity 0.5s
+    transition: border-color 1s, opacity 0.5s, transform 0.5s;
   }
 
-  .uploadArea #image {
+  .uploadArea #add {
     transition: transform 0.75s
   }
 
@@ -13,13 +13,13 @@
     opacity: 1
   }
 
-  .uploadArea:hover #image {
+  .uploadArea:hover #add {
     transform: scale(1.25) rotate(360deg)
   }
 
   .view-enter-active,
   .view-leave-active {
-    transition: transform 0.5s, opacity 0.5s
+    transition: opacity 0.5s, transform 0.5s
   }
 
   .view-enter-from,
@@ -53,7 +53,7 @@
        </div>
 
         <div class="uploadArea shadow" @click="selectFile" @dragover="$event.preventDefault()" @drop="handleFileDrop" style="display: flex; justify-content: center; align-items: center; border: 2.5px dashed var(--textColor); border-radius: 10px; margin-left: 30px; margin-right: 30px; margin-bottom: 30px; width: 65%; height: 40%; cursor: pointer">
-          <svg id="image" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 40px"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
+          <svg id="add" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="color: var(--textColor); width: 40px"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
         </div>
 
         <Transition name="message">
@@ -75,7 +75,7 @@
 
 <script lang="ts">
   import RenderWorker from '../scripts/worker?worker'
-  import { LensData } from '../types/lens'
+  import type { LensData } from '../types/lens'
 
   // Data
   interface Data {

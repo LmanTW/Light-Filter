@@ -7,7 +7,7 @@
         <h1 style="color: var(--textColor); font-size: 12px; white-space: nowrap; margin: 0px; opacity: 0.75">Resolution: {{state.resolution}}</h1>
       </div>
     </div>
-    <h1 class="button highlightText" :style="{ color: 'var(--textColor)', fontSize: '20px', opacity: (state.type === 'idle') ? 1 : 0.5, transition: 'opacity 0.5s, transform 0.5s cubic-bezier(0, 0.55, 0.45, 1)' }">Render</h1>
+    <h1 class="button" :style="{ color: 'var(--textColor)', fontSize: '20px', opacity: (state.type === 'idle') ? 1 : 0.5, transition: 'color 1s, opacity 0.5s, transform 0.5s cubic-bezier(0, 0.55, 0.45, 1)' }">Render</h1>
     <div style="flex: 1"></div>
   </div>
 </template>
