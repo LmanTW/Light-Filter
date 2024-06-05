@@ -1,7 +1,7 @@
 <style scoped>
   .uploadArea {
     opacity: 0.5;
-    transition: border-color 1s, opacity 0.5s, transform 0.5s;
+    transition: opacity 0.5s, transform 0.5s;
   }
 
   .uploadArea #add {
@@ -41,7 +41,7 @@
 
 <template>
   <div class="shadow" style="background-color: var(--mainColor); border-radius: 25px; width: 100%; height: 100%; overflow: hidden;">
-    <Transition name="view">
+    <Transition name="view" mode="out-in">
       <div v-if="state === 'upload'" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
         <h1 style="color: var(--textColor); font-size: 30px; text-align: center; margin: 0px; margin-left: 30px; margin-right: 30px; margin-top: 30px; margin-bottom: 10px">Upload An Image</h1>
         <div style="display: flex; align-items: center; margin-left: 39px; margin-right: 30px; margin-bottom: 50px">
@@ -50,7 +50,7 @@
             <div style="background-color: var(--textColor); border-radius: 5px; width: 1px; height: 100%; opacity: 0.25"></div>
           </div>
           <h1 style="color: var(--textColor); font-size: 17.5px; text-align: center; margin: 0px; width: 50%; opacity: 0.75">Click here to select a image file.</h1>
-       </div>
+        </div>
 
         <div class="uploadArea shadow" @click="selectFile" @dragover="$event.preventDefault()" @drop="handleFileDrop" style="display: flex; justify-content: center; align-items: center; border: 2.5px dashed var(--textColor); border-radius: 10px; margin-left: 30px; margin-right: 30px; margin-bottom: 30px; width: 65%; height: 40%; cursor: pointer">
           <svg id="add" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="color: var(--textColor); width: 40px"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M256 176v160M336 256H176"/></svg>
@@ -62,10 +62,7 @@
       </div>
 
       <div v-else-if="state === 'loading'" style="display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%">
-        <div style="display: flex; align-items: center">
-          <h1 style="color: var(--textColor); font-size: 25px; margin: 0px; margin-right: 15px">Loading</h1>
-          <div style="border: 3px solid var(--textColor); border-radius: 10px; width: 25px; height: 25px; animation: loading 1s infinite linear"></div>
-        </div>
+        <div style="border: 3px solid var(--textColor); border-radius: 10px; width: 25px; height: 25px; animation: loading 1s infinite linear"></div> 
       </div>
 
       <canvas id="canvas" v-else style="width: 100%; height: 100%"></canvas>
@@ -75,6 +72,7 @@
 
 <script lang="ts">
   import RenderWorker from '../scripts/worker?worker'
+  import { waitUntil } from '../scripts/waitUntil'
   import type { LensData } from '../types/lens'
 
   // Data
@@ -116,16 +114,39 @@
         const msg = data.data
 
         if (msg.type === 'setState') {
-          this.workerStateType = msg.stateType
+          if (msg.stateType !== undefined) this.workerStateType = msg.stateType
 
           this.$emit('set-state', { type: (this.workerStateType === 'idle') ? 'idle' : 'rendering', state: msg.state, progress: msg.progress, resolution: msg.resolution })
         } else if (msg.type === 'renderResult') {
           if (this.state === 'canvas') {
-            this.previewData = new ImageData(msg.width, msg.height) 
+            if (msg.preview) {
+              this.previewData = new ImageData(msg.width, msg.height) 
 
-            this.previewData.data.set(msg.data, 0)
+              this.previewData.data.set(msg.data, 0)
 
-            this.displayPreview()
+              this.displayPreview()
+            } else {
+              const image = new ImageData(msg.width, msg.height) 
+
+              image.data.set(msg.data, 0)
+
+              const canvas = document.createElement('canvas') as HTMLCanvasElement
+              const ctx = canvas.getContext('2d')!
+
+              canvas.width = msg.width
+              canvas.height = msg.height
+
+              ctx.putImageData(image, 0, 0)
+
+              const link = document.body.appendChild(document.createElement('a'))
+
+              link.href = canvas.toDataURL()
+              link.download = 'Result.png'
+
+              link.click()
+
+              link.remove()
+            }
           } 
         }
       })
@@ -177,7 +198,11 @@
             reader.addEventListener('loadend', (event) => {
               this.state = 'canvas'
 
-              this.image.addEventListener('load', () => this.$emit('image-uploaded', { width: this.image.width, height: this.image.height }), { once: true })
+              this.image.addEventListener('load', async () => {
+                await waitUntil(() => document.getElementById('canvas') !== null)
+  
+                this.$emit('image-uploaded', { width: this.image.width, height: this.image.height }), { once: true }
+              })
 
               this.image.src = event.target!.result as string
             })
@@ -196,19 +221,27 @@
         }
       },
 
-      renderPreview (lenses: LensData[]): void {
+      async renderPreview (lenses: LensData[]): Promise<void> {
         if (this.state === 'canvas') {
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')!
+          if (this.workerStateType === 'idle') {
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')!
 
-          const size = this.calculateAspectRatioFit(this.image.width, this.image.height, 350, 350)
+            const size = this.calculateAspectRatioFit(this.image.width, this.image.height, 350, 350)
 
-          canvas.width = size.width
-          canvas.height = size.height 
+            canvas.width = size.width
+            canvas.height = size.height 
 
-          ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height)
+            ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height)
 
-          this.worker.postMessage({ type: 'render', lenses: JSON.parse(JSON.stringify(lenses)), width: canvas.width, height: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data }) 
+            this.worker.postMessage({ type: 'render', preview: true, lenses: JSON.parse(JSON.stringify(lenses)), width: canvas.width, height: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data })
+          } else if (this.workerStateType === 'renderingPreview') {
+            this.worker.postMessage({ type: 'stop' })
+
+            await waitUntil(() => this.workerStateType === 'idle')
+
+            this.renderPreview(lenses)
+          }
         }
       },
 
@@ -233,6 +266,18 @@
 
           ctx2.drawImage(canvas, (canvas2.width / 2) - (size.width / 2), (canvas2.height / 2) - (size.height / 2), size.width, size.height)
         }
+      },
+
+      render (lenses: LensData[]): void {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')!
+
+        canvas.width = this.image.width
+        canvas.height = this.image.height
+
+        ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height)
+
+        this.worker.postMessage({ type: 'render', preview: false, lenses: JSON.parse(JSON.stringify(lenses)), width: canvas.width, height: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data })
       },
 
       calculateAspectRatioFit (srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number): { width: number, height: number } {

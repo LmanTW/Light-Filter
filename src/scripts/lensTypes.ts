@@ -1,3 +1,6 @@
+import type { LensType } from '../types/lens'
+import type { Pixel } from '../types/pixel'
+
 export const lensTypes: { [key: string]: LensType } = {
   none: {
     name: 'None',
@@ -9,14 +12,14 @@ export const lensTypes: { [key: string]: LensType } = {
     options: {}
   },
 
-  'colorAdjustment': {
+  colorAdjustment: {
     name: 'Color Adjustment',
 
     pixel: (pixel, options) => {
       return {
-        r: pixel.color.r + options.red,
-        g: pixel.color.g + options.green,
-        b: pixel.color.b + options.blue
+        r: limitValue(pixel.color.r + options.red, 0, 255),
+        g: limitValue(pixel.color.g + options.green, 0, 255),
+        b: limitValue(pixel.color.b + options.blue, 0, 255)
       }
     },
 
@@ -116,6 +119,78 @@ export const lensTypes: { [key: string]: LensType } = {
     }
   },
 
+  brightness: {
+    name: 'Brightness',
+
+    pixel: (pixel, options) => {
+      return {
+        r: limitValue(pixel.color.r + (255 * options.brightness), 0, 255),
+        g: limitValue(pixel.color.g + (255 * options.brightness), 0, 255),
+        b: limitValue(pixel.color.b + (255 * options.brightness), 0, 255)
+      }
+    },
+
+    options: {
+      brightness: {
+        name: 'Brightness',
+        default: 0,
+
+        min: -1,
+        max: 1,
+        step: 0.1
+      }
+    }
+  },
+
+  ghost: {
+    name: 'Ghost',
+
+    pixel: (pixel, options) => {
+      const offset = (pixel.size.width + pixel.size.height) / 10
+
+      const color = pixel.getColor(pixel.position.x - (options.xOffset * offset), pixel.position.y - (options.yOffset * offset))
+
+      return (color === undefined) ? {
+        r: pixel.color.r,
+        g: pixel.color.g,
+        b: pixel.color.b
+      } : {
+        r: pixel.color.r + ((color.r - pixel.color.r) * options.strength),
+        g: pixel.color.g + ((color.g - pixel.color.g) * options.strength),
+        b: pixel.color.b + ((color.b - pixel.color.b) * options.strength)
+      }
+    },
+
+    options: {
+      strength: {
+        name: 'Strength',
+        default: 0,
+
+        min: 0,
+        max: 1,
+        step: 0.1
+      },
+
+      xOffset: {
+        name: 'X Offset',
+        default: 0,
+
+        min: -1,
+        max: 1,
+        step: 0.1
+      },
+
+      yOffset: {
+        name: 'X Offset',
+        default: 0,
+
+        min: -1,
+        max: 1,
+        step: 0.1
+      }
+    }
+  },
+
   grayscale: {
     name: 'Grayscale',
 
@@ -141,6 +216,29 @@ export const lensTypes: { [key: string]: LensType } = {
     }
   },
 
+  invert: {
+    name: 'Invert',
+
+    pixel: (pixel, options) => {
+      return {
+        r: pixel.color.r + (((255 - (pixel.color.r)) - pixel.color.r) * options.strength),
+        g: pixel.color.g + (((255 - (pixel.color.g)) - pixel.color.g) * options.strength),
+        b: pixel.color.b + (((255 - (pixel.color.b)) - pixel.color.b) * options.strength)
+      }
+    },
+
+    options: {
+      strength: {
+        name: 'Strength',
+        default: 0,
+
+        min: 0,
+        max: 1,
+        step: 0.1
+      }
+    }
+  },
+
   noise: {
     name: 'Noise',
 
@@ -149,9 +247,9 @@ export const lensTypes: { [key: string]: LensType } = {
         const value = ((Math.random() - 0.5) * 2) * (255 * options.strength)
 
         return {
-          r: pixel.color.r + value,
-          g: pixel.color.g + value,
-          b: pixel.color.b + value
+          r: limitValue(pixel.color.r + value, 0, 255),
+          g: limitValue(pixel.color.g + value, 0, 255),
+          b: limitValue(pixel.color.b + value, 0, 255)
         }
       }
 
@@ -177,6 +275,59 @@ export const lensTypes: { [key: string]: LensType } = {
         step: 0.1
       }
     }
+  },
+
+  wave: {
+    name: 'Wave',
+
+    pixel: (pixel, options) => {
+      const value = (6.28 / (pixel.size.width * options.size)) * pixel.position.x
+      const distance = Math.sin(value) * (pixel.size.height * options.strength)
+      
+      let x = pixel.position.x + (distance * Math.cos(options.angle * Math.PI / 180))
+      let y = pixel.position.y + (distance * Math.sin(options.angle * Math.PI / 180))
+
+      while (y < 0) y += pixel.size.height
+      while (y > pixel.size.height) y -= pixel.size.height
+
+      while (x < 0) x += pixel.size.width
+      while (x > pixel.size.width) x -= pixel.size.width
+
+      const color = pixel.getColor(Math.round(x), Math.round(y))
+
+      if (color === undefined) return { r: pixel.color.r, g: pixel.color.g, b: pixel.color.b }
+
+      return { r: color.r, g: color.g, b: color.b }
+    },
+
+    options: {
+      strength: {
+        name: 'Strength',
+        default: 0,
+
+        min: 0,
+        max: 1,
+        step: 0.1
+      },
+      
+      size: {
+        name: 'Size',
+        default: 0.5,
+
+        min: 0,
+        max: 1,
+        step: 0.05
+      },
+
+      angle: {
+        name: 'Angle',
+        default: 90,
+
+        min: 0,
+        max: 360,
+        step: 1
+      }
+    }
   }
 }
 
@@ -187,4 +338,10 @@ function posterizeChannel(value: number, levels: number): number {
   return Math.round(value / step) * step
 }
 
-import type { LensType } from '../types/lens'
+// Limit The Range Of A Value
+function limitValue (value: number, min: number, max: number): number {
+  if (value < min) return min
+  else if (value > max) return max
+
+  return value
+}

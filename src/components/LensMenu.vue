@@ -61,8 +61,8 @@
 </template>
 
 <script lang="ts">
+  import type { LensType, LensData } from '../types/lens'
   import { lensTypes } from '../scripts/lensTypes'
-  import { LensType, LensData } from '../types/lens'
 
   // Data
   interface Data {

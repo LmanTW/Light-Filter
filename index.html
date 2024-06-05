@@ -6,7 +6,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="/icon.ico">
   </head>
 
   <style>
@@ -18,13 +18,12 @@
       --highlightColor: #B40BE6;
 
       --red: #F30E0E;
-      --yellow: #ECF20F;
+      --yellow: #F2D30F;
       --green: #0FF21C
     }
 
     * {
-      font-family: Arial, sans-serif;
-      transition: background-color 1s, color 1s
+      font-family: Arial, sans-serif
     }
 
     ::-webkit-scrollbar {
@@ -51,7 +50,7 @@
 
     .button {
       text-decoration: underline;
-      transition: color 1s, transform 0.5s cubic-bezier(0, 0.55, 0.45, 1);
+      transition: transform 0.5s cubic-bezier(0, 0.55, 0.45, 1);
       cursor: pointer
     }
 
@@ -64,7 +63,7 @@
     }
 
     .highlightText {
-      background: linear-gradient(45deg, var(--highlightColor1), var(--highlightColor2));
+      background: linear-gradient(45deg, #B40BE6, #D90BE6);
 
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent
