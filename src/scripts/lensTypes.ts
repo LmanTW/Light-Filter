@@ -146,9 +146,9 @@ export const lensTypes: { [key: string]: LensType } = {
     name: 'Ghost',
 
     pixel: (pixel, options) => {
-      const offset = (pixel.size.width + pixel.size.height) / 10
+      const offset = (pixel.size.width + pixel.size.height) / 5
 
-      const color = pixel.getColor(pixel.position.x - (options.xOffset * offset), pixel.position.y - (options.yOffset * offset))
+      const color = pixel.getColor(Math.round(pixel.position.x - (options.xOffset * offset)), Math.round(pixel.position.y - (options.yOffset * offset)))
 
       return (color === undefined) ? {
         r: pixel.color.r,
