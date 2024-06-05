@@ -2,11 +2,23 @@ export const lensTypes: { [key: string]: LensType } = {
   none: {
     name: 'None',
 
+    pixel: (pixel) => {
+      return pixel.color
+    },
+
     options: {}
   },
 
   'colorAdjustment': {
     name: 'Color Adjustment',
+
+    pixel: (pixel, options) => {
+      return {
+        r: pixel.color.r + options.red,
+        g: pixel.color.g + options.green,
+        b: pixel.color.b + options.blue
+      }
+    },
 
     options: {
       red: {
@@ -40,6 +52,10 @@ export const lensTypes: { [key: string]: LensType } = {
 
   blur: {
     name: 'Blur',
+
+    pixel: (pixel) => {
+      return pixel.color
+    },
 
     options: {
       strength: {

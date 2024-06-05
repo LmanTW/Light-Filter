@@ -74,6 +74,7 @@
 </template>
 
 <script lang="ts">
+  import RenderWorker from '../scripts/worker?worker'
   import { LensData } from '../types/lens'
 
   // Data
@@ -84,6 +85,7 @@
     errorMessage: undefined | string,
 
     worker: Worker,
+    workerStateType: 'idle' | 'renderingPreview' | 'rendering',
 
     image: HTMLImageElement,
     previewData: ImageData,
@@ -99,6 +101,8 @@
         state: 'upload',
         errorMessage: undefined, 
 
+        workerStateType: 'idle',
+
         image: new Image(),
 
         windowSizeChanged: true
@@ -106,13 +110,32 @@
     },
 
     mounted () {
-      this.worker = new Worker('../worker.ts')
+      this.worker = new RenderWorker()
+
+      this.worker.addEventListener('message', (data) => {
+        const msg = data.data
+
+        if (msg.type === 'setState') {
+          this.workerStateType = msg.stateType
+
+          this.$emit('set-state', { type: (this.workerStateType === 'idle') ? 'idle' : 'rendering', state: msg.state, progress: msg.progress, resolution: msg.resolution })
+        } else if (msg.type === 'renderResult') {
+          if (this.state === 'canvas') {
+            this.previewData = new ImageData(msg.width, msg.height) 
+
+            this.previewData.data.set(msg.data, 0)
+
+            this.displayPreview()
+          } 
+        }
+      })
 
       setInterval(() => {
         if (this.windowSizeChanged) {
           this.windowSizeChanged = false
 
           this.setCanvasSize()
+          this.displayPreview()
         }
       }, 100)
 
@@ -154,7 +177,7 @@
             reader.addEventListener('loadend', (event) => {
               this.state = 'canvas'
 
-              this.image.addEventListener('load', () => this.$emit('image-uploaded'), { once: true })
+              this.image.addEventListener('load', () => this.$emit('image-uploaded', { width: this.image.width, height: this.image.height }), { once: true })
 
               this.image.src = event.target!.result as string
             })
@@ -168,8 +191,8 @@
 
           const rect = canvas.getBoundingClientRect()
 
-          canvas.width = rect.width / 1
-          canvas.height = rect.height / 1
+          canvas.width = rect.width
+          canvas.height = rect.height 
         }
       },
 
@@ -185,9 +208,30 @@
 
           ctx.drawImage(this.image, 0, 0, canvas.width, canvas.height)
 
-          console.log(new Uint8Array(ctx.getImageData(0, 0, canvas.width, canvas.height).data))
-
           this.worker.postMessage({ type: 'render', lenses: JSON.parse(JSON.stringify(lenses)), width: canvas.width, height: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data }) 
+        }
+      },
+
+      displayPreview (): void {
+        if (this.state === 'canvas') {
+          this.setCanvasSize()
+
+          const canvas = document.createElement('canvas')
+          const ctx = canvas.getContext('2d')!
+
+          canvas.width = this.previewData.width
+          canvas.height = this.previewData.height
+
+          ctx.putImageData(this.previewData, 0, 0)
+
+          const canvas2 = document.getElementById('canvas') as HTMLCanvasElement
+          const ctx2 = canvas2.getContext('2d')!
+
+          ctx2.clearRect(0, 0, canvas2.width, canvas2.height)
+ 
+          const size = this.calculateAspectRatioFit(canvas.width, canvas.height, canvas2.width, canvas2.height)
+
+          ctx2.drawImage(canvas, (canvas2.width / 2) - (size.width / 2), (canvas2.height / 2) - (size.height / 2), size.width, size.height)
         }
       },
 

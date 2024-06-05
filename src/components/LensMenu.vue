@@ -33,13 +33,13 @@
       <TransitionGroup name="list">
         <div class="shadow" v-for="(lensData, lensIndex) in lensesData" :key="lensData" style="display: flex; background-color: var(--mainColor); border-radius: 15px; margin-left: 25px; margin-bottom: 12.5px; width: calc(100% - 47.5px)">
           <div style="flex: 1; margin-left: 12.5px; margin-top: 10px; margin-bottom: 10px">
-            <select class="button" @change="setLensType(lensIndex, $event.target.value)" v-model="lensData.type" :style="{ appearance: 'none', outline: 'none', backgroundColor: 'var(--mainColor)', color: 'var(--textColor)', border: 'none', fontSize: '20px', fontWeight: 'bold', margin: '0px', marginBottom: (lensData.type === 'none') ? '' : '5px',  width: '200px', cursor: 'pointer' }">
+            <select @change="setLensType(lensIndex, $event.target.value)" v-model="lensData.type" :style="{ appearance: 'none', outline: 'none', backgroundColor: 'var(--mainColor)', color: 'var(--textColor)', border: 'none', fontSize: '20px', textDecoration: 'underline', fontWeight: 'bold', margin: '0px', marginBottom: (lensData.type === 'none') ? '' : '5px',  width: '200px', cursor: 'pointer' }">
               <option v-for="(lens, type) in lensTypes" :key="lens" :value="type" style="font-size: 10px">{{lens.name}}</option>
             </select>
 
             <div v-for="(option, optionID) in lensTypes[lensData.type].options" :key="option" style="display: flex; margin-top: 5px;">
               <h1 style="color: var(--textColor); font-size: 15px; margin: 0px; margin-right: 10px">{{option.name}}:</h1>
-              <input type="range" @input="setLensOption(lensIndex, optionID, $event.target.value)" @change="update" :value="lensData.options[optionID]" :step="option.step" :min="option.min" :max="option.max" style="flex: 1; margin-right: 10px">
+              <input type="range" @input="setLensOption(lensIndex, optionID, +$event.target.value)" :value="lensData.options[optionID]" :step="option.step" :min="option.min" :max="option.max" style="flex: 1; margin-right: 10px">
               <h1 style="color: var(--textColor); font-size: 15px; margin: 0px; margin-right: 10px; width: 35px">{{lensData.options[optionID]}}</h1>
             </div>
 
@@ -108,13 +108,13 @@
           options: {}
         })
 
-        this.updateCooldown = 2
+        this.updateCooldown = 1
       },
 
       removeLens (lensIndex: number): void {
         this.lensesData.splice(lensIndex, 1)
 
-        this.updateCooldown = 2
+        this.updateCooldown = 1
       },
 
       setLensType (lensIndex: number, type: string): void {
@@ -125,19 +125,19 @@
         this.lensesData[lensIndex].type = type
         this.lensesData[lensIndex].options = options
 
-        this.updateCooldown = 2
+        this.updateCooldown = 1
       },
 
       setLensEnabled (lensIndex: number, value: boolean): void {
         this.lensesData[lensIndex].enabled = value
 
-        this.updateCooldown = 2
+        this.updateCooldown = 1
       },
 
       setLensOption (lensIndex: number, id: string, value: number): void {
         this.lensesData[lensIndex].options[id] = value
 
-        this.updateCooldown = 2
+        this.updateCooldown = 1
       },
 
       moveLensUp (lensIndex: number): void {
@@ -147,7 +147,7 @@
           this.lensesData[lensIndex] = this.lensesData[lensIndex - 1]
           this.lensesData[lensIndex - 1] = lens
   
-          this.updateCooldown = 2
+          this.updateCooldown = 1
         } else if (this.lensesData.length > 1) this.moveLensDown(lensIndex)
       },
 
@@ -158,7 +158,7 @@
           this.lensesData[lensIndex] = this.lensesData[lensIndex + 1]
           this.lensesData[lensIndex + 1] = lens
 
-          this.updateCooldown = 3
+          this.updateCooldown = 1
         } else if (this.lensesData.length > 1) this.moveLensUp(lensIndex)
       },
     } 
