@@ -164,19 +164,21 @@
     },
 
     methods: {
+      // Select A File
       selectFile (): void {
         if (this.state === 'upload') {
-          const element = document.createElement('input')
+          const dialog = document.createElement('input')
 
-          element.type = 'file'
-          element.accept = this.acceptImageTypes.join(',')
+          dialog.type = 'file'
+          dialog.accept = this.acceptImageTypes.join(',')
 
-          element.addEventListener('change', (event) => this.loadImage((event.target as HTMLInputElement).files![0]))
+          dialog.addEventListener('change', (event) => this.loadImage((event.target as HTMLInputElement).files![0]))
 
-          element.click()
+          dialog.click()
         }
       },
 
+      // Handle A File Drop
       handleFileDrop (event: DragEvent): void {
         if (this.state === 'upload') {
           event.preventDefault()
@@ -185,6 +187,7 @@
         }
       },
 
+      // Load An Image
       loadImage (file: File): void {
         if (this.state === 'upload') {
           if (this.acceptImageTypes.includes(file.type)) {
@@ -210,6 +213,7 @@
         }
       },
 
+      // Set The Size Of The Canvas
       setCanvasSize (): void {
         if (this.state === 'canvas') {
           const canvas = document.getElementById('canvas') as HTMLCanvasElement
@@ -221,6 +225,7 @@
         }
       },
 
+      // Render The Preview
       async renderPreview (lenses: LensData[]): Promise<void> {
         if (this.state === 'canvas') {
           if (this.workerStateType === 'idle') {
@@ -245,6 +250,7 @@
         }
       },
 
+      // Display The Preview
       displayPreview (): void {
         if (this.state === 'canvas') {
           this.setCanvasSize()
@@ -268,6 +274,7 @@
         }
       },
 
+      // Render
       render (lenses: LensData[]): void {
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')!
@@ -280,6 +287,7 @@
         this.worker.postMessage({ type: 'render', preview: false, lenses: JSON.parse(JSON.stringify(lenses)), width: canvas.width, height: canvas.height, data: ctx.getImageData(0, 0, canvas.width, canvas.height).data })
       },
 
+      // Calculate Aspect Ratio Fit 
       calculateAspectRatioFit (srcWidth: number, srcHeight: number, maxWidth: number, maxHeight: number): { width: number, height: number } {
         const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight)
 

@@ -24,9 +24,11 @@
 <template>
   <div class="shadow" style="display: flex; flex-direction: column; flex-shrink: 0; background-color: var(--mainColor); border-radius: 25px; overflow: hidden">
     <div class="shadow" style="position: sticky; display: flex; flex-shrink: 0; align-items: center; background-color: var(--mainColor); border-radius: 20px; margin-left: 25px; margin-right: 25px; top: 25px; height: 50px; z-index: 999">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="color: var(--textColor); margin-left: 10px; width: 30px"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M360 94.59V296M443.13 212.87L296 360M417.41 360H216M299.13 443.13l-144-144M152 416V216M68.87 299.13l144-144M94.59 152H288M212.87 68.87L360 216"/></svg>
-      <div style="flex: 1"></div>
-      <h1 class="button" @click="addLens" style="color: var(--textColor); font-size: 15px; margin: 0px; margin-right: 12.5px">Add Lens</h1>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="color: var(--textColor); margin-left: 10px; margin-right: 7.5px; width: 30px"><path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192 192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M360 94.59V296M443.13 212.87L296 360M417.41 360H216M299.13 443.13l-144-144M152 416V216M68.87 299.13l144-144M94.59 152H288M212.87 68.87L360 216"/></svg>
+      <h1 class="button" @click="$emit('load-lenses')" style="color: var(--textColor); font-size: 15px; margin: 0px; margin-right: 10px">Load</h1>
+      <h1 class="button" @click="$emit('save-lenses')" style="color: var(--textColor); font-size: 15px; margin: 0px">Save</h1>
+      <div style="flex: 1"></div> 
+      <h1 class="button" @click="addLens" style="color: var(--textColor); font-size: 15px; margin: 0px; margin-right: 12.5px">Add Lens</h1> 
     </div>
 
     <div style="flex: 1; position: relative; display: list-item; list-style: none; padding-top: 87.5px; padding-bottom: 12.5px; margin-top: -50px; overflow-y: scroll">
@@ -95,10 +97,19 @@
     },
 
     methods: {
+      // Set The Lenses
+      setLenses (lensesData: LensData[]): void {
+        while (this.lensesData.length > 0) this.lensesData.splice(0, 1)
+
+        lensesData.forEach((lensData) => this.lensesData.push(lensData))
+      },
+
+      // Get The Lenses
       getLenses (): LensData[] {
         return this.lensesData
       },
 
+      // Add A Lens 
       addLens (): void {
         this.lensesData.push({
           type: 'none',
@@ -111,12 +122,14 @@
         this.updateCooldown = 1
       },
 
+      // Remove A Lens
       removeLens (lensIndex: number): void {
         this.lensesData.splice(lensIndex, 1)
 
         this.updateCooldown = 1
       },
 
+      // Set The Type Of A Lens
       setLensType (lensIndex: number, type: string): void {
         const options: { [key: string]: number } = {}
 
@@ -128,18 +141,21 @@
         this.updateCooldown = 1
       },
 
+      // Toggle A Lens
       setLensEnabled (lensIndex: number, value: boolean): void {
         this.lensesData[lensIndex].enabled = value
 
         this.updateCooldown = 1
       },
 
+      // Set A Options In A Lens
       setLensOption (lensIndex: number, id: string, value: number): void {
         this.lensesData[lensIndex].options[id] = value
 
         this.updateCooldown = 1
       },
-
+  
+      // Move A Lens Up
       moveLensUp (lensIndex: number): void {
         if (lensIndex > 0) {
           const lens = this.lensesData[lensIndex] 
@@ -151,6 +167,7 @@
         } else if (this.lensesData.length > 1) this.moveLensDown(lensIndex)
       },
 
+      // Move A Lens Down
       moveLensDown (lensIndex: number): void {
         if (lensIndex < this.lensesData.length - 1) {
           const lens = this.lensesData[lensIndex] 

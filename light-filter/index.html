@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <title>Light Filter</title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/icon.ico">
+    <script type="module" crossorigin src="/assets/index-B9LzbMte.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BdhslfX0.css">
+  </head>
+
+  <style>
+    :root {
+      --backgroundColor: #DFE3E1;
+      --textColor: #101311;
+
+      --mainColor: #f2f4f3;
+      --highlightColor: #B40BE6;
+
+      --red: #F30E0E;
+      --yellow: #F2D30F;
+      --green: #0FF21C
+    }
+
+    * {
+      font-family: Arial, sans-serif
+    }
+
+    ::-webkit-scrollbar {
+      background-color: transparent;
+      width: 2.5px;
+      height: 2.5px
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--textColor);
+      border-radius: 2.5px
+    }
+
+    @keyframes loading {
+      0% { border-radius: 1px; transform: rotate(0deg) }
+      50% { border-radius: 15px; }
+      100% { border-radius: 1px; transform: rotate(360deg) }
+    }
+
+    .shadow {
+      box-shadow: 0px 0px 25px 2.5px rgba(0,0,0,0.25);
+      -webkit-box-shadow: 0px 0px 25px 2.5px rgba(0,0,0,0.25)
+    }
+
+    .button {
+      text-decoration: underline;
+      transition: transform 0.5s cubic-bezier(0, 0.55, 0.45, 1);
+      cursor: pointer
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+    }
+
+    .button:active {
+      transform: scale(1.1);
+    }
+
+    .highlightText {
+      background: linear-gradient(45deg, #B40BE6, #D90BE6);
+
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent
+    }
+  </style>
+
+  <body style="background-color: var(--backgroundColor); margin: 0px; overflow: hidden">
+    <div id="app"></div>
+
+  </body>
+</html>

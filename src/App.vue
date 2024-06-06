@@ -4,7 +4,7 @@
       <ImageCanvas ref="imageCanvas" @image-uploaded="imageUploaded" @set-state="setState" style="flex: 1; margin-bottom: 15px"></ImageCanvas>
       <ActionBar ref="actionBar" @render="render"></ActionBar>
     </div>
-    <LensMenu ref="lensMenu" @lens-updated="$refs.imageCanvas.renderPreview($refs.lensMenu.getLenses())" style="flex: 1; margin: 30px; margin-left: 15px"></LensMenu>
+    <LensMenu ref="lensMenu" @load-lenses="loadLenses" @save-lenses="saveLenses" @lens-updated="$refs.imageCanvas.renderPreview($refs.lensMenu.getLenses())" style="flex: 1; margin: 30px; margin-left: 15px"></LensMenu>
   </div> 
 </template>
 
@@ -22,7 +22,10 @@
       render: (lenses: LensData[]) => void
     },
     actionBar: { updateState: (type?: 'idle' | 'rendering', state?: string, progress?: null | number, resolution?: string) => void },
-    lensMenu:{ getLenses: () => LensData[] } 
+    lensMenu:{
+      setLenses: (lensesData: LensData[]) => void,
+      getLenses: () => LensData[]
+    }
   }
 
   export default {
@@ -47,19 +50,52 @@
     },
 
     methods: {
+      // Image Uploaded
       imageUploaded (event: { width: number, height: number }): void {
         this.actionBar.updateState(undefined, undefined, undefined, `${event.width} x ${event.height}`)
 
         this.imageCanvas.renderPreview(this.lensMenu.getLenses())
       },
 
+      // Render
       render (): void {
         this.imageCanvas.render(this.lensMenu.getLenses())
       },
 
+      // Set The State
       setState (event: { type?: 'idle' | 'rendering', state?: string, progress?: null | number, resolution?: string }): void {
         this.actionBar.updateState(event.type, event.state, event.progress, event.resolution)
       },
+
+      // Load The Lenses
+      loadLenses (): void {
+        const dialog = document.createElement('input')
+
+        dialog.type = 'file'
+        dialog.accept = 'application/json' 
+
+        dialog.addEventListener('change', (event) => {
+          const reader = new FileReader()
+
+          reader.readAsText((event.target as HTMLInputElement).files![0])
+
+          reader.addEventListener('loadend', (event) => this.lensMenu.setLenses(JSON.parse(event.target!.result as string)))
+
+          this.imageCanvas.renderPreview(this.lensMenu.getLenses())
+        })
+
+        dialog.click()
+      },
+
+      // Save The Lenses
+      saveLenses (): void {
+        const link = document.body.appendChild(document.createElement('a'))
+
+        link.href = `data:application/json;base64,${btoa(JSON.stringify(this.lensMenu.getLenses()))}` 
+        link.download = 'Lenses.json'
+
+        link.click()
+      }
     }
   }
 </script>

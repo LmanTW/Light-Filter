@@ -43,6 +43,7 @@
     },
 
     methods: {
+      // Update The State
       updateState (type?: 'idle' | 'rendering', state?: string, progress?: null | number, resolution?: string): void {
         if (type !== undefined) this.state.type = type
         if (state !== undefined) this.state.state = state

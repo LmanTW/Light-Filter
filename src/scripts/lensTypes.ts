@@ -177,7 +177,7 @@ export const lensTypes: { [key: string]: LensType } = {
 
         min: -1,
         max: 1,
-        step: 0.1
+        step: 0.05
       },
 
       yOffset: {
@@ -186,7 +186,7 @@ export const lensTypes: { [key: string]: LensType } = {
 
         min: -1,
         max: 1,
-        step: 0.1
+        step: 0.05
       }
     }
   },
@@ -282,7 +282,7 @@ export const lensTypes: { [key: string]: LensType } = {
 
     pixel: (pixel, options) => {
       const value = (6.28 / (pixel.size.width * options.size)) * pixel.position.x
-      const distance = Math.sin(value) * (pixel.size.height * options.strength)
+      const distance = Math.sin(value) * ((pixel.size.height / 2) * options.strength)
       
       let x = pixel.position.x + (distance * Math.cos(options.angle * Math.PI / 180))
       let y = pixel.position.y + (distance * Math.sin(options.angle * Math.PI / 180))
@@ -307,7 +307,7 @@ export const lensTypes: { [key: string]: LensType } = {
 
         min: 0,
         max: 1,
-        step: 0.1
+        step: 0.05
       },
       
       size: {
