@@ -221,7 +221,7 @@
           const rect = canvas.getBoundingClientRect()
 
           canvas.width = rect.width
-          canvas.height = rect.height 
+          canvas.height = rect.height - 5
         }
       },
 

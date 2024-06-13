@@ -1,10 +1,10 @@
 <template>
-  <div style="display: flex; width: 100vw; height: 100vh">
-    <div style="flex: 1; display: flex; flex-direction: column; margin: 30px; margin-right: 15px">
+  <div style="display: flex; flex-wrap: wrap; gap: 30px; margin: 30px; width: calc(100vw - 60px); height: calc(100vh - 60px)">
+    <div style="flex: 1; display: flex; flex-direction: column; min-width: 400px; min-height: 450px">
       <ImageCanvas ref="imageCanvas" @image-uploaded="imageUploaded" @set-state="setState" style="flex: 1; margin-bottom: 15px"></ImageCanvas>
       <ActionBar ref="actionBar" @render="render"></ActionBar>
     </div>
-    <LensMenu ref="lensMenu" @load-lenses="loadLenses" @save-lenses="saveLenses" @lens-updated="$refs.imageCanvas.renderPreview($refs.lensMenu.getLenses())" style="flex: 1; margin: 30px; margin-left: 15px"></LensMenu>
+    <LensMenu ref="lensMenu" @load-lenses="loadLenses" @save-lenses="saveLenses" @lens-updated="$refs.imageCanvas.renderPreview($refs.lensMenu.getLenses())" style="flex: 1; flex-shrink: 0; min-width: 400px; height: 100%"></LensMenu>
   </div> 
 </template>
 

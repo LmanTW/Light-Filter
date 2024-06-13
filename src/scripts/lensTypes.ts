@@ -1,5 +1,4 @@
 import type { LensType } from '../types/lens'
-import type { Pixel } from '../types/pixel'
 
 export const lensTypes: { [key: string]: LensType } = {
   none: {
@@ -10,6 +9,70 @@ export const lensTypes: { [key: string]: LensType } = {
     },
 
     options: {}
+  },
+ 
+  blur: {
+    name: 'Blur',
+
+    pixel: (pixel, options) => {
+      const averageR: number[] = []
+      const averageG: number[] = []
+      const averageB: number[] = []
+
+      const radius = Math.round(((pixel.size.width + pixel.size.height) / 75) * options.strength)
+
+      for (let x = pixel.position.x - radius; x < pixel.position.x + radius; x++) {
+        for (let y = pixel.position.y - radius; y < pixel.position.y + radius; y++) {
+          const color = pixel.getColor(x, y)
+
+          if (color !== undefined) {
+            averageR.push(color.r)
+            averageG.push(color.g)
+            averageB.push(color.b)
+          }
+        }
+      }
+
+      return {
+        r: (averageR.length > 0) ? averageR.reduce((a, b) => a + b) / averageR.length : pixel.color.r,
+        g: (averageG.length > 0) ? averageG.reduce((a, b) => a + b) / averageG.length : pixel.color.g,
+        b: (averageB.length > 0) ? averageB.reduce((a, b) => a + b) / averageB.length : pixel.color.b
+      } 
+    },
+
+    options: {
+      strength: {
+        name: 'Strength',
+        default: 0,
+
+        min: 0,
+        max: 1,
+        step: 0.1 
+      }
+    }
+  },
+
+  brightness: {
+    name: 'Brightness',
+
+    pixel: (pixel, options) => {
+      return {
+        r: limitValue(pixel.color.r + (255 * options.brightness), 0, 255),
+        g: limitValue(pixel.color.g + (255 * options.brightness), 0, 255),
+        b: limitValue(pixel.color.b + (255 * options.brightness), 0, 255)
+      }
+    },
+
+    options: {
+      brightness: {
+        name: 'Brightness',
+        default: 0,
+
+        min: -1,
+        max: 1,
+        step: 0.1
+      }
+    }
   },
 
   colorAdjustment: {
@@ -72,70 +135,6 @@ export const lensTypes: { [key: string]: LensType } = {
         default: 0,
 
         min: 0,
-        max: 1,
-        step: 0.1
-      }
-    }
-  },
-
-  blur: {
-    name: 'Blur',
-
-    pixel: (pixel, options) => {
-      const averageR: number[] = []
-      const averageG: number[] = []
-      const averageB: number[] = []
-
-      const radius = Math.round(((pixel.size.width + pixel.size.height) / 75) * options.strength)
-
-      for (let x = pixel.position.x - radius; x < pixel.position.x + radius; x++) {
-        for (let y = pixel.position.y - radius; y < pixel.position.y + radius; y++) {
-          const color = pixel.getColor(x, y)
-
-          if (color !== undefined) {
-            averageR.push(color.r)
-            averageG.push(color.g)
-            averageB.push(color.b)
-          }
-        }
-      }
-
-      return {
-        r: (averageR.length > 0) ? averageR.reduce((a, b) => a + b) / averageR.length : pixel.color.r,
-        g: (averageG.length > 0) ? averageG.reduce((a, b) => a + b) / averageG.length : pixel.color.g,
-        b: (averageB.length > 0) ? averageB.reduce((a, b) => a + b) / averageB.length : pixel.color.b
-      } 
-    },
-
-    options: {
-      strength: {
-        name: 'Strength',
-        default: 0,
-
-        min: 0,
-        max: 1,
-        step: 0.1 
-      }
-    }
-  },
-
-  brightness: {
-    name: 'Brightness',
-
-    pixel: (pixel, options) => {
-      return {
-        r: limitValue(pixel.color.r + (255 * options.brightness), 0, 255),
-        g: limitValue(pixel.color.g + (255 * options.brightness), 0, 255),
-        b: limitValue(pixel.color.b + (255 * options.brightness), 0, 255)
-      }
-    },
-
-    options: {
-      brightness: {
-        name: 'Brightness',
-        default: 0,
-
-        min: -1,
         max: 1,
         step: 0.1
       }
