@@ -44,7 +44,7 @@ self.addEventListener('message', (data) => {
             data[i] = pixel.color.r
             data[i + 1] = pixel.color.g
             data[i + 2] = pixel.color.b
-            data[i + 3] = 255
+            data[i + 3] = data[i + 3]
           }
 
           msg.data.set(data, 0)
